@@ -53,7 +53,11 @@ export function parseStatementCsv(text: string): string[][] {
 
 export function parseStatementDate(raw: string): string | null {
   const value = raw.trim();
-  const match = value.match(/^(\d{1,4})[-/.](\d{1,2})[-/.](\d{2,4})$/);
+  const named = value.match(/^(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})$/);
+  const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  const normalized = named && months.includes(named[2].toLowerCase())
+    ? [named[1], months.indexOf(named[2].toLowerCase()) + 1, named[3]].join("/") : value;
+  const match = normalized.match(/^(\d{1,4})[-/.](\d{1,2})[-/.](\d{2,4})$/);
   if (!match) return null;
   const yearFirst = match[1].length === 4;
   let year = Number(yearFirst ? match[1] : match[3]);
