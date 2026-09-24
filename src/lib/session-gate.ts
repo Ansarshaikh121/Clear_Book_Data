@@ -1,6 +1,7 @@
 import { redirect } from "@tanstack/react-router";
 import { createMiddleware, createServerFn } from "@tanstack/react-start";
 import { authRedirectTarget } from "@/lib/auth-redirect";
+import { isMarketingPath } from "@/lib/seo";
 
 const forwardBearer = createMiddleware({ type: "function" })
   .client(async ({ next }) => {
@@ -25,6 +26,8 @@ export const fetchSessionUser = createServerFn({ method: "GET" })
   });
 
 export async function gateLocation(pathname: string) {
+  // Public feature pages never need a session. Keep /'s signed-in redirect.
+  if (pathname !== "/" && isMarketingPath(pathname)) return;
   const session = await fetchSessionUser();
   const target = authRedirectTarget(session, pathname);
   if (target) throw redirect({ to: target });
