@@ -4,6 +4,7 @@ import { Copy, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { useEditor } from "@/components/budget/frame";
+import { BankStatementImport } from "@/components/budget/bank-statement-import";
 import { CATEGORIES, categoryById, categoryColor, formatDay, formatMoney, periodBounds, periodLabel, summarizeRange, transactionWindow, type CurrencyCode, type Kind, type Transaction } from "@/lib/budget/model";
 import { useBudget } from "@/lib/budget/store";
 
@@ -172,6 +173,7 @@ export function TransactionsPage() {
         </ul>
       )}
       <p className="mt-2 text-xs text-muted-foreground">{rows.length} transaction{rows.length === 1 ? "" : "s"}</p>
+      <BankStatementImport />
     </section>
   );
 }
