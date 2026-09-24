@@ -81,6 +81,10 @@ export function categoryById(id: string): Category | undefined {
   return CATEGORIES.find((category) => category.id === id);
 }
 
+export function isCategoryForKind(categoryId: string, kind: Kind): boolean {
+  return categoryById(categoryId)?.kind === kind;
+}
+
 export function currentMonthKey(now = new Date()): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
@@ -145,7 +149,7 @@ export const AMOUNT_MESSAGE = "Enter an amount greater than zero.";
 
 /** Integer cents only. Rejects negatives, zero, blanks, and non-numeric text. Never takes an absolute value. */
 export function isPositiveCents(amount: unknown): amount is number {
-  return typeof amount === "number" && Number.isInteger(amount) && Number.isFinite(amount) && amount > 0 && amount <= 100_000_000_000;
+  return typeof amount === "number" && Number.isInteger(amount) && Number.isFinite(amount) && amount > 0 && amount <= 2_147_483_647;
 }
 
 export function parseMajorAmount(raw: string): number | null {
