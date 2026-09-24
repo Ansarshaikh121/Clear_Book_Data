@@ -128,6 +128,7 @@ export function TransactionsPage() {
         <Total label="Saved" value={formatMoney(rangeSummary.savings, currency)} />
         <Total label="Remaining" value={formatMoney(rangeSummary.remaining, currency)} />
       </dl>
+      <BankStatementImport />
       <label className="mt-4 grid gap-1 text-sm">
         <span className="sr-only">Search transactions</span>
         <input className="field" type="search" value={query} placeholder="Search transactions" onChange={(event) => setQuery(event.target.value)} />
@@ -173,7 +174,6 @@ export function TransactionsPage() {
         </ul>
       )}
       <p className="mt-2 text-xs text-muted-foreground">{rows.length} transaction{rows.length === 1 ? "" : "s"}</p>
-      <BankStatementImport />
     </section>
   );
 }
