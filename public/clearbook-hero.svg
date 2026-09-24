@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 620" fill="none">
+<defs>
+ <linearGradient id="card" x1="160" y1="0" x2="630" y2="580" gradientUnits="userSpaceOnUse"><stop stop-color="#416273"/><stop offset="1" stop-color="#193744"/></linearGradient>
+ <linearGradient id="glow" x1="199" y1="140" x2="595" y2="525" gradientUnits="userSpaceOnUse"><stop stop-color="#A5EACB"/><stop offset="1" stop-color="#91A5DC"/></linearGradient>
+ <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="24"/></filter>
+</defs>
+<ellipse cx="434" cy="317" rx="278" ry="246" fill="#57A888" opacity=".15" filter="url(#shadow)"/>
+<circle cx="405" cy="310" r="244" stroke="#BCE4D3" stroke-opacity=".2"/>
+<circle cx="405" cy="310" r="196" stroke="#BCE4D3" stroke-opacity=".12"/>
+<path d="M92 432c129-84 240-9 345-113 67-67 119-84 228-74" stroke="#A5EACB" stroke-opacity=".32" stroke-width="2" stroke-dasharray="5 12"/>
+<g transform="rotate(-7 412 289)">
+ <rect x="167" y="105" width="460" height="367" rx="30" fill="#142F3C" stroke="#9FDEC4" stroke-opacity=".27" stroke-width="2"/>
+ <rect x="183" y="121" width="428" height="335" rx="23" fill="url(#card)"/>
+ <circle cx="226" cy="162" r="6" fill="#A5EACB"/><circle cx="249" cy="162" r="6" fill="#B7C7EA" opacity=".75"/><circle cx="272" cy="162" r="6" fill="#F1B5A9" opacity=".65"/>
+ <path d="M213 192h368" stroke="#C9E8DD" stroke-opacity=".19"/>
+ <text x="216" y="239" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="2" fill="#C9E8DD">YOUR MONTH AT A GLANCE</text>
+ <text x="213" y="290" font-family="Georgia,serif" font-size="42" fill="#F6F4EF">A clearer picture.</text>
+ <path d="M216 391V366h63v25M301 391v-52h63v52M386 391v-76h63v76M471 391v-106h63v106" fill="#83CBB0" fill-opacity=".37" stroke="#A5EACB" stroke-opacity=".65" stroke-width="2"/>
+ <path d="M215 351c33-11 46-10 72-29 35-25 52 2 81-15 28-16 43-55 77-45 31 8 59-18 92-42" stroke="url(#glow)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+ <circle cx="537" cy="220" r="7" fill="#B7DCE2" stroke="#F6F4EF" stroke-width="3"/>
+ <path d="M215 410h320" stroke="#C9E8DD" stroke-opacity=".2" stroke-width="2"/>
+</g>
+<g transform="rotate(8 581 454)">
+ <rect x="465" y="397" width="225" height="112" rx="21" fill="#E0F4E9"/>
+ <circle cx="505" cy="438" r="17" fill="#227255" opacity=".15"/>
+ <path d="m497 438 6 6 12-14" stroke="#227255" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+ <text x="535" y="440" font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#173C34">Savings goal</text>
+ <rect x="536" y="455" width="107" height="9" rx="4.5" fill="#B9D8CB"/>
+ <rect x="536" y="455" width="73" height="9" rx="4.5" fill="#258362"/>
+</g>
+<circle cx="128" cy="188" r="6" fill="#A5EACB" opacity=".8"/><circle cx="677" cy="139" r="4" fill="#B7C7EA"/><circle cx="110" cy="507" r="3" fill="#C9E8DD"/>
+</svg>
