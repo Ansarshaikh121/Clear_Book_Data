@@ -105,6 +105,7 @@ export function BankStatementImport() {
       const response = await importBankTransactions({ data: { confirm: true, transactions: data }, signal: ledgerRequestSignal() });
       if (useBudget.getState().epoch !== epoch || useBudget.getState().ownerId !== ownerId) return;
       applyRemote(epoch, response.snapshot);
+      if (response.added > 0 && data[0]) useBudget.getState().setViewMonth(data[0].date.slice(0, 7));
       setResult(`${response.added} transactions imported; ${response.duplicates} duplicates skipped.`);
       setRows([]);
       setSelected(new Set());
@@ -133,7 +134,7 @@ export function BankStatementImport() {
             <ul className="divide-y divide-border">
               {rows.map((row) => (
                 <li key={row.id} className="grid gap-2 p-3 text-sm sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-                  <input type="checkbox" aria-label={`Import row ${row.sourceRow}`} checked={selected.has(row.id)} onChange={() => setSelected((current) => {
+                  <input type="checkbox" aria-label={`Import row ${row.sourceRow}`} disabled={row.reason?.startsWith("Already in ledger") ?? false} checked={selected.has(row.id)} onChange={() => setSelected((current) => {
                     const next = new Set(current); if (next.has(row.id)) next.delete(row.id); else next.add(row.id); return next;
                   })} />
                   <div className="min-w-0">
