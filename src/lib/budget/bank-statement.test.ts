@@ -37,6 +37,7 @@ test("signed amounts need a direction and nonzero amount", () => {
   assert.equal(result.rows[0].kind, "expense");
   assert.equal(result.rows[1].kind, "income");
   assert.equal(parseStatementDate("31/02/2026"), null);
+  assert.equal(parseStatementDate("24-Sep-2026"), "2026-09-24");
   assert.equal(statementKey(result.rows[0]), "2026-09-24|expense|12000|restaurant");
 });
 
