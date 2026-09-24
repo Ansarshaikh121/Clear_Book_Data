@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { PublicShell, ProseSection } from "@/components/budget/public-shell";
 import { HOME_DESCRIPTION, HOME_H1 } from "@/lib/seo";
 
@@ -121,7 +122,15 @@ function FactList({ title, items }: { title: string; items: readonly string[] })
   );
 }
 
+const previewMoney = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+
 function MonthPreview() {
+  const income = 80_000;
+  const expenses = 45_000;
+  const [savings, setSavings] = useState(10_000);
+  const remaining = income - expenses - savings;
+  const money = (amount: number) => previewMoney.format(amount);
+
   return (
     <section className="month-preview enter enter-2 mt-6" aria-labelledby="month-preview-title">
       <div className="month-preview-header">
@@ -137,12 +146,12 @@ function MonthPreview() {
       <div className="month-preview-grid">
         <div className="month-preview-balance">
           <p className="text-sm text-muted-foreground">Remaining after expenses and savings</p>
-          <p className="month-preview-amount">₹25,000</p>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">₹80,000 income − ₹45,000 expenses − ₹10,000 savings</p>
-          <div className="month-preview-bar mt-7" role="img" aria-label="Example: 56.25 percent expenses, 12.5 percent savings, and 31.25 percent remaining from ₹80,000 income">
-            <span className="month-preview-segment month-preview-expenses" />
-            <span className="month-preview-segment month-preview-savings" />
-            <span className="month-preview-segment month-preview-remaining" />
+          <output className="month-preview-amount block" aria-live="polite">{money(remaining)}</output>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">{money(income)} income − {money(expenses)} expenses − {money(savings)} savings</p>
+          <div className="month-preview-bar mt-7" role="img" aria-label={`Example: ${money(expenses)} expenses, ${money(savings)} savings, and ${money(remaining)} remaining from ${money(income)} income`}>
+            <span className="month-preview-segment month-preview-expenses" style={{ width: `${expenses / income * 100}%` }} />
+            <span className="month-preview-segment month-preview-savings" style={{ width: `${savings / income * 100}%` }} />
+            <span className="month-preview-segment month-preview-remaining" style={{ width: `${remaining / income * 100}%` }} />
           </div>
           <div className="month-preview-legend" aria-hidden="true">
             <span><i className="month-preview-dot month-preview-dot-expenses" />Expenses</span>
@@ -151,10 +160,22 @@ function MonthPreview() {
           </div>
         </div>
         <div className="month-preview-entries" aria-label="Illustrative ledger entries">
-          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-income" aria-hidden="true">+</span><span><strong>Pay</strong><small>Income recorded</small></span><b>+₹80,000</b></div>
-          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-expense" aria-hidden="true">−</span><span><strong>Groceries &amp; more</strong><small>Expenses recorded</small></span><b>−₹45,000</b></div>
-          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-savings" aria-hidden="true">↗</span><span><strong>Money set aside</strong><small>Savings recorded</small></span><b>−₹10,000</b></div>
+          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-income" aria-hidden="true">+</span><span><strong>Pay</strong><small>Income recorded</small></span><b>+{money(income)}</b></div>
+          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-expense" aria-hidden="true">−</span><span><strong>Groceries &amp; more</strong><small>Expenses recorded</small></span><b>−{money(expenses)}</b></div>
+          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-savings" aria-hidden="true">↗</span><span><strong>Money set aside</strong><small>Savings recorded</small></span><b>{savings === 0 ? money(0) : `−${money(savings)}`}</b></div>
         </div>
+      </div>
+      <div className="month-preview-try">
+        <div className="month-preview-try-heading">
+          <div>
+            <label htmlFor="preview-savings" className="font-medium text-foreground">What if you set aside {money(savings)}?</label>
+            <p id="month-preview-range-help" className="mt-1 text-xs text-muted-foreground">Move the slider to see how savings change the amount remaining.</p>
+          </div>
+          <button type="button" className="month-preview-reset" onClick={() => setSavings(10_000)}>Reset</button>
+        </div>
+        <input id="preview-savings" className="month-preview-range" type="range" min="0" max="30000" step="1000" value={savings} onChange={(event) => setSavings(Number(event.target.value))} aria-describedby="month-preview-range-help" />
+        <div className="month-preview-range-labels" aria-hidden="true"><span>₹0</span><span>₹30,000</span></div>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">Try the example here; your changes are not saved to an account.</p>
       </div>
       <a href="/budget-worksheet" className="month-preview-link">Try your own figures <span aria-hidden="true">→</span></a>
     </section>
