@@ -12,7 +12,7 @@ export function parseWorksheetRupees(raw: string): number | null {
 
 /** Same relationship the ledger uses: income − expenses − savings. */
 export function monthlyRemaining(income: number, expenses: number, savings: number): number {
-  return income - expenses - savings;
+  return (Math.round(income * 100) - Math.round(expenses * 100) - Math.round(savings * 100)) / 100;
 }
 
 export function formatRupees(value: number): string {
