@@ -46,6 +46,7 @@ export function BankStatementImport() {
   const [rows, setRows] = useState<PreviewRow[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [filename, setFilename] = useState("");
+  const [previewOwner, setPreviewOwner] = useState<string | null>(null);
   const [skipped, setSkipped] = useState(0);
   const [error, setError] = useState("");
   const [result, setResult] = useState("");
@@ -62,6 +63,7 @@ export function BankStatementImport() {
     setResult("");
     setError("");
     setCurrencyConfirmed(false);
+    setPreviewOwner(null);
     if (!file) return;
     if (file.size > 2_000_000) { setError("Choose a statement smaller than 2 MB."); return; }
     setWorking(true);
@@ -83,6 +85,7 @@ export function BankStatementImport() {
       setSelected(new Set(preview.filter((row) => !row.review).map((row) => row.id)));
       setSkipped(parsed.skipped);
       setFilename(file.name);
+      setPreviewOwner(ownerId);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not read this statement.");
     } finally { setWorking(false); }
@@ -93,7 +96,7 @@ export function BankStatementImport() {
   }
 
   async function confirm() {
-    if (!ownerId || !currencyConfirmed || selected.size === 0 || working) return;
+    if (!ownerId || ownerId !== previewOwner || !currencyConfirmed || selected.size === 0 || working) return;
     setWorking(true);
     setError("");
     setResult("");
@@ -110,6 +113,7 @@ export function BankStatementImport() {
       setRows([]);
       setSelected(new Set());
       setFilename("");
+      setPreviewOwner(null);
       setCurrencyConfirmed(false);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Import failed. No rows were confirmed.");
@@ -126,7 +130,8 @@ export function BankStatementImport() {
       {error ? <p className="mt-2 text-sm text-negative" role="alert">{error}</p> : null}
       {result ? <p className="mt-2 text-sm text-positive" role="status">{result}</p> : null}
       {working ? <p className="mt-2 text-sm" role="status">Processing…</p> : null}
-      {rows.length > 0 ? (
+      {rows.length > 0 && ownerId !== previewOwner ? <p role="alert" className="mt-2 text-sm text-negative">Account changed. Choose your statement again before importing.</p> : null}
+      {rows.length > 0 && ownerId === previewOwner ? (
         <div className="mt-4">
           <p className="text-sm font-medium">{filename}: {rows.length} valid rows, {skipped} skipped, {selected.size} selected.</p>
           <p className="mt-1 text-xs text-muted-foreground">Possible transfers and duplicates are unchecked. Check descriptions and categories carefully. The selected rows will use your ledger currency ({currency}); no conversion is applied.</p>
