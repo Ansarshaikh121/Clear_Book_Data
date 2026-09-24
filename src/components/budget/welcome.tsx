@@ -11,17 +11,66 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [verified, setVerified] = useState(false);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError("");
     setPending(true);
-    const result =
-      mode === "signup"
-        ? await authClient.signUp.email({ email, password, name: name.trim() || "Clearbook", callbackURL: "/dashboard" })
-        : await authClient.signIn.email({ email, password, callbackURL: "/dashboard" });
-    setPending(false);
-    if (result.error) setError(result.error.message || "Could not sign in.");
+    try {
+      if (mode === "signup") {
+        const result = await authClient.signUp.email({
+          email: email.trim().toLowerCase(),
+          password,
+          name: name.trim() || "Clearbook",
+        });
+        if (result.error) throw new Error(result.error.message || "Could not create account.");
+        setVerificationEmail(email.trim().toLowerCase());
+        setVerified(false);
+      } else {
+        const result = await authClient.signIn.email({ email, password, callbackURL: "/dashboard" });
+        if (result.error) throw new Error(result.error.message || "Could not sign in.");
+        window.location.assign("/dashboard");
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Something went wrong. Please try again.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function verify(event: FormEvent) {
+    event.preventDefault();
+    setError("");
+    setPending(true);
+    try {
+      const result = await authClient.emailOtp.verifyEmail({ email: verificationEmail, otp: otp.trim() });
+      if (result.error) throw new Error(result.error.message || "Incorrect or expired code.");
+      setVerified(true);
+      setPassword("");
+      setMode("login");
+      setVerificationEmail("");
+      setOtp("");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not verify this code.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function resend() {
+    setError("");
+    setPending(true);
+    try {
+      const result = await authClient.emailOtp.sendVerificationOtp({ email: verificationEmail, type: "email-verification" });
+      if (result.error) throw new Error(result.error.message || "Could not resend code.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not resend code.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -41,12 +90,24 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
             : "Open your own records, budgets, and savings goals where you left off."}
         </p>
         <p className="auth-quick-benefit">Track expenses <span aria-hidden="true">·</span> Set goals <span aria-hidden="true">·</span> Export your records</p>
-        <form className="panel mt-4 grid gap-3 p-4" onSubmit={submit}>
+        {verified ? <p className="mt-4 rounded-md bg-muted px-4 py-3 text-sm" role="status">Email verified. Log in with your password to open your ledger.</p> : null}
+        {verificationEmail ? (
+          <form className="panel mt-4 grid gap-3 p-4" onSubmit={verify}>
+            <p className="text-sm">We sent a verification code to <strong>{verificationEmail}</strong>. Enter it within 10 minutes to activate your account.</p>
+            <label className="grid gap-1 text-sm font-medium">Verification code
+              <input className="field" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={otp} onChange={(event) => setOtp(event.target.value)} />
+            </label>
+            {error ? <p className="text-sm text-negative" role="alert">{error}</p> : null}
+            <Button type="submit" disabled={pending}>{pending ? "Please wait…" : "Verify email"}</Button>
+            <button type="button" className="text-sm font-medium text-primary underline-offset-2 hover:underline" onClick={resend} disabled={pending}>Resend code</button>
+            <button type="button" className="text-sm text-muted-foreground underline-offset-2 hover:underline" onClick={() => { setVerificationEmail(""); setOtp(""); setError(""); }}>Use a different email</button>
+          </form>
+        ) : <form className="panel mt-4 grid gap-3 p-4" onSubmit={submit}>
           <div className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1">
-            <button type="button" className={mode === "signup" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => setMode("signup")}>
+            <button type="button" className={mode === "signup" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => { setMode("signup"); setVerificationEmail(""); setError(""); setVerified(false); }}>
               Create account
             </button>
-            <button type="button" className={mode === "login" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => setMode("login")}>
+            <button type="button" className={mode === "login" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => { setMode("login"); setVerificationEmail(""); setError(""); }}>
               Log in
             </button>
           </div>
@@ -71,7 +132,7 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
           ) : null}
           {error ? <p className="text-sm text-negative" role="alert">{error}</p> : null}
           <Button type="submit" disabled={pending}>{pending ? "Please wait…" : mode === "signup" ? "Create account" : "Log in"}</Button>
-        </form>
+        </form>}
         <div className="mt-3 grid gap-2">
           {GROK_PROVIDERS.map((provider) => (
             <Button key={provider.providerId} variant="secondary" onClick={() => signIn(provider.providerId, { callbackURL: "/dashboard" })}>
