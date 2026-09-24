@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PublicShell, ProseSection } from "@/components/budget/public-shell";
 import { HOME_DESCRIPTION, HOME_H1 } from "@/lib/seo";
 
@@ -39,13 +39,52 @@ const START = [
 ] as const;
 
 export function HomePage() {
+  const motionScope = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let disposed = false;
+    let cleanup = () => {};
+    void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ gsap }, { ScrollTrigger }]) => {
+      if (disposed || !motionScope.current) return;
+      gsap.registerPlugin(ScrollTrigger);
+      const media = gsap.matchMedia();
+      media.add("(prefers-reduced-motion: no-preference)", () => {
+        const context = gsap.context(() => {
+          gsap.from(".hero-art-layer", { opacity: 0, scale: 1.08, duration: 1.25, ease: "power2.out" });
+          gsap.from(".hero-landing > p, .hero-landing > h1, .hero-landing > .hero-actions", {
+            opacity: 0, y: 18, duration: 0.68, stagger: 0.12, ease: "power2.out",
+          });
+          gsap.from(".month-preview", {
+            opacity: 0, y: 26, duration: 0.75, ease: "power2.out",
+            scrollTrigger: { trigger: ".month-preview", start: "top 88%", once: true },
+          });
+          gsap.from(".month-preview-ring", {
+            opacity: 0, scale: 0.88, rotate: -12, duration: 0.8, ease: "back.out(1.2)",
+            scrollTrigger: { trigger: ".month-preview-visual", start: "top 85%", once: true },
+          });
+          gsap.from(".month-preview-entry", {
+            opacity: 0, y: 14, stagger: 0.09, duration: 0.55, ease: "power2.out",
+            scrollTrigger: { trigger: ".month-preview-entries", start: "top 90%", once: true },
+          });
+        }, motionScope);
+        return () => context.revert();
+      });
+      cleanup = () => media.revert();
+    }).catch(() => {
+      // Content stays visible when animation code cannot load.
+    });
+    return () => { disposed = true; cleanup(); };
+  }, []);
+
   return (
     <PublicShell path="/">
-      <section className="hero hero-landing enter mt-8 overflow-hidden px-6 py-10 sm:px-10 sm:py-14">
+      <div ref={motionScope} className="home-motion">
+      <section className="hero hero-landing mt-8 overflow-hidden px-6 py-10 sm:px-10 sm:py-14">
+        <div className="hero-art-layer" aria-hidden="true" />
         <p className="text-sm text-hero-muted">Personal ledger</p>
         <h1 className="mt-3 max-w-xl font-display text-4xl leading-tight text-hero-foreground sm:text-5xl">{HOME_H1}</h1>
         <p className="mt-4 max-w-xl text-base text-hero-muted">{HOME_DESCRIPTION}</p>
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="hero-actions mt-6 flex flex-wrap gap-3">
           <a
             href="/login"
             className="press inline-flex h-11 items-center rounded-md bg-hero-foreground px-4 text-sm font-medium text-hero hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hero-foreground"
@@ -103,6 +142,7 @@ export function HomePage() {
       <FactList title="See the month" items={MONTH} />
       <FactList title="Kept with your account" items={ACCOUNT} />
       <FactList title="Good to know" items={LIMITS} />
+      </div>
     </PublicShell>
   );
 }
@@ -135,7 +175,7 @@ function MonthPreview() {
   const money = (amount: number) => previewMoney.format(amount);
 
   return (
-    <section className="month-preview enter enter-2 mt-6" aria-labelledby="month-preview-title">
+    <section className="month-preview mt-6" aria-labelledby="month-preview-title">
       <div className="month-preview-header">
         <div>
           <p className="month-preview-eyebrow">A clearer view of your month</p>
