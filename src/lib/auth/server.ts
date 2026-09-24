@@ -223,6 +223,15 @@ export const auth = betterAuth({
   // local loopback variants, or clients get "Invalid origin".
   trustedOrigins,
 
+  rateLimit: {
+    enabled: true,
+    customRules: {
+      "/sign-up/email": { window: 600, max: 5 },
+      "/email-otp/send-verification-otp": { window: 600, max: 3 },
+      "/email-otp/verify-email": { window: 600, max: 10 },
+    },
+  },
+
   // Encrypt broker-issued OAuth tokens at rest, and treat the broker's upstreams
   // as trusted first-party identities. The broker owns identity and X emails are
   // synthetic/unverified, so WITHOUT this a login can fail with
@@ -275,7 +284,9 @@ export const auth = betterAuth({
       otpLength: 6,
       expiresIn: 600,
       allowedAttempts: 5,
+      storeOTP: "hashed",
       sendVerificationOnSignUp: true,
+      overrideDefaultEmailVerification: true,
       async sendVerificationOTP({ email, otp, type }) {
         if (type !== "email-verification") return;
         await deliverSignupOtp(email, otp);
