@@ -855,3 +855,151 @@
     transform: none;
   }
 }
+
+/* Homepage month story: cinematic depth without taking over the ledger UI. */
+.month-preview {
+  position: relative;
+  isolation: isolate;
+  color: #f6f4ef;
+  border-color: rgb(255 255 255 / 0.13);
+  background: radial-gradient(circle at 90% 12%, rgb(84 142 132 / 0.22), transparent 38%), linear-gradient(145deg, #192b35, #102027);
+  box-shadow: 0 24px 54px rgb(15 35 42 / 0.17);
+}
+
+.month-preview::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 25%, rgb(255 255 255 / 0.035) 45%, transparent 65%);
+  pointer-events: none;
+}
+
+.month-preview .month-preview-header h2,
+.month-preview .month-preview-amount,
+.month-preview .month-preview-try label,
+.month-preview .month-preview-entry strong,
+.month-preview .month-preview-entry b {
+  color: #f6f4ef;
+}
+
+.month-preview .month-preview-header + p,
+.month-preview .month-preview-balance > p,
+.month-preview .month-preview-try p,
+.month-preview .month-preview-range-labels,
+.month-preview .month-preview-legend,
+.month-preview .month-preview-entry small {
+  color: #cad5d6;
+}
+
+.month-preview-eyebrow { color: #9ddec0; }
+
+.month-preview-badge,
+.month-preview-balance,
+.month-preview-try,
+.month-preview-entry {
+  border-color: rgb(255 255 255 / 0.14);
+  background: rgb(255 255 255 / 0.055);
+}
+
+.month-preview-balance { border: 1px solid rgb(255 255 255 / 0.11); }
+
+.month-preview-visual {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.month-preview-ring {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  width: clamp(10rem, 43vw, 12.5rem);
+  aspect-ratio: 1;
+  place-items: center;
+  padding: 0.85rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px rgb(255 255 255 / 0.035), 0 16px 32px rgb(0 0 0 / 0.22);
+  animation: ring-arrive 650ms var(--ease-smooth-out) both;
+  transition: filter var(--motion-fast), transform var(--motion-fast) var(--ease-smooth-out);
+}
+
+.month-preview-ring:hover {
+  filter: brightness(1.13);
+  transform: scale(1.025);
+}
+
+.month-preview-ring-center {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #172c34;
+  text-align: center;
+}
+
+.month-preview-ring-center span,
+.month-preview-ring-center small {
+  color: #cbd7d8;
+  font-size: 0.68rem;
+}
+
+.month-preview-ring-center strong {
+  margin-block: 0.15rem;
+  color: #f6f4ef;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 4.8vw, 1.65rem);
+  line-height: 1.1;
+}
+
+.month-preview-visual-note {
+  display: grid;
+  flex: 1 1 8rem;
+  gap: 0.4rem;
+  max-width: 15rem;
+  color: #cad5d6;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.month-preview-visual-note strong {
+  color: #f6f4ef;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.month-preview-visual-kicker {
+  color: #9ddec0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.month-preview-bar { background: rgb(255 255 255 / 0.15); }
+.month-preview-try { background: rgb(255 255 255 / 0.07); }
+.month-preview-reset,
+.month-preview-link { color: #9ddec0; }
+.month-preview-reset:hover { background: rgb(255 255 255 / 0.12); }
+.month-preview-reset:focus-visible,
+.month-preview-range:focus-visible,
+.month-preview-link:focus-visible { outline-color: #9ddec0; }
+.month-preview-entry { box-shadow: 0 10px 25px rgb(0 0 0 / 0.08); }
+.month-preview-badge { color: #cad5d6; }
+
+@keyframes ring-arrive {
+  from { opacity: 0; transform: scale(0.88) rotate(-14deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .month-preview-ring { animation: none; transition: none; }
+  .month-preview-ring:hover { transform: none; }
+}
