@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createWriteQueue } from "@/lib/budget/write-queue";
 import {
   AMOUNT_MESSAGE,
   currentMonthKey,
@@ -216,15 +217,20 @@ function rotateLedgerAbort() {
   ledgerAbort = new AbortController();
 }
 
+const enqueueProfileWrite = createWriteQueue();
+
 function persistProfile(epoch: number, ownerId: string | null) {
   const state = useBudget.getState();
   const signal = ledgerRequestSignal();
-  void saveLedgerProfile({
-    data: { currency: state.currency, settings: state.settings, viewMonth: state.viewMonth },
-    signal,
-  }).catch(() => {
+  const data = { currency: state.currency, settings: state.settings, viewMonth: state.viewMonth };
+  void enqueueProfileWrite(async () => {
     if (signal.aborted || !sameSession(epoch, ownerId)) return;
-    useBudget.setState({ notice: { text: "Could not save those preferences.", undo: null } });
+    try {
+      await saveLedgerProfile({ data, signal });
+    } catch {
+      if (signal.aborted || !sameSession(epoch, ownerId)) return;
+      useBudget.setState({ notice: { text: "Could not save those preferences.", undo: null } });
+    }
   });
 }
 
