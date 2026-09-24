@@ -22,7 +22,7 @@ async function readTable(file: File): Promise<string[][]> {
         const value = cell.value;
         if (value instanceof Date) {
           cells.push(value.toISOString().slice(0, 10));
-        } else if (typeof value === "number" && /[dy]/i.test(cell.numFmt) && i === 1) {
+        } else if (typeof value === "number" && /[dy]/i.test(cell.numFmt) ) {
           const date = new Date(Date.UTC(1899, 11, 30) + value * 86_400_000);
           cells.push(date.toISOString().slice(0, 10));
         } else if (value && typeof value === "object" && "result" in value) {
@@ -53,13 +53,6 @@ export function BankStatementImport() {
   const [currencyConfirmed, setCurrencyConfirmed] = useState(false);
 
   const existing = new Set(transactions.map(statementKey));
-  const duplicates = new Set<string>();
-  for (const row of rows) {
-    const key = statementKey(row);
-    if (existing.has(key) || duplicates.has(key)) duplicates.add(key);
-    else duplicates.add(key);
-  }
-
   async function chooseFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
