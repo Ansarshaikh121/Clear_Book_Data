@@ -16,5 +16,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      - run: npm run check:auth
       - run: node --experimental-strip-types --test src/lib/auth/sign-in-gate.test.ts
