@@ -62,6 +62,7 @@ export function HomePage() {
             opacity: 0, scale: 0.88, rotate: -12, duration: 0.8, ease: "back.out(1.2)",
             scrollTrigger: { trigger: ".month-preview-visual", start: "top 85%", once: true },
           });
+          gsap.from(".home-step-card", { opacity: 0, y: 22, stagger: 0.1, duration: 0.65, ease: "power2.out", scrollTrigger: { trigger: ".home-steps", start: "top 85%", once: true } });
           gsap.from(".month-preview-entry", {
             opacity: 0, y: 14, stagger: 0.09, duration: 0.55, ease: "power2.out",
             scrollTrigger: { trigger: ".month-preview-entries", start: "top 90%", once: true },
@@ -102,6 +103,24 @@ export function HomePage() {
 
       <MonthPreview />
 
+      <section className="home-intro" aria-labelledby="home-intro-title">
+        <span className="home-section-number" aria-hidden="true">01 / THE IDEA</span>
+        <div>
+          <h2 id="home-intro-title">A little more clarity. <em>A lot less guesswork.</em></h2>
+          <p>Put your everyday money in one place. See what came in, what went out, and what you chose to set aside—without pretending the example below is your real bank balance.</p>
+        </div>
+      </section>
+
+      <section className="home-steps" aria-labelledby="home-steps-title">
+        <div className="home-section-heading"><span className="home-section-number">02 / THE FLOW</span><h2 id="home-steps-title">Your month, in three moves.</h2></div>
+        <div className="home-step-grid">
+          <article className="home-step-card"><span>01</span><h3>Record it.</h3><p>Add income, expenses, and savings on the dates they happened.</p></article>
+          <article className="home-step-card"><span>02</span><h3>See it.</h3><p>Read the month you choose, with categories and a clear remaining sum.</p></article>
+          <article className="home-step-card"><span>03</span><h3>Make a plan.</h3><p>Set category budgets and savings goals that suit your own life.</p></article>
+        </div>
+      </section>
+
+      <div className="home-details">
       <ProseSection title="Who it is for">
         <p>
           Clearbook is for a person tracking their own money: salary or other income, everyday expenses, and amounts set aside. Amounts display in rupees unless you change the symbol. It is not accounting software, and it does not prepare GST invoices, business books, or tax returns.
@@ -124,12 +143,13 @@ export function HomePage() {
         </p>
       </ProseSection>
 
-      <section className="mt-10">
-        <h2 className="font-display text-2xl text-foreground">Read a specific part</h2>
-        <ul className="mt-4 divide-y divide-border border-y border-border">
+      <section className="home-directory mt-10">
+        <span className="home-section-number">03 / EXPLORE</span>
+        <h2 className="font-display text-2xl text-foreground">Go deeper, your way.</h2>
+        <ul className="home-directory-grid mt-4">
           {START.map((item) => (
             <li key={item.href}>
-              <a href={item.href} className="grid gap-1 py-3 hover:bg-muted">
+              <a href={item.href} className="home-directory-link grid gap-1 py-3">
                 <span className="text-sm font-medium text-primary">{item.label}</span>
                 <span className="text-sm leading-6 text-foreground">{item.text}</span>
               </a>
@@ -143,6 +163,7 @@ export function HomePage() {
       <FactList title="Kept with your account" items={ACCOUNT} />
       <FactList title="Good to know" items={LIMITS} />
       </div>
+      <section className="home-final"><span className="home-section-number">START HERE</span><h2>Your next month can be clearer.</h2><p>Try the worksheet first, or create an account and begin with your own records.</p><div><a href="/login">Create account <span aria-hidden="true">↗</span></a><a href="/budget-worksheet">Try the worksheet <span aria-hidden="true">→</span></a></div></section>
     </PublicShell>
   );
 }
