@@ -40,7 +40,7 @@ const START = [
 export function HomePage() {
   return (
     <PublicShell path="/">
-      <section className="hero mt-8 px-6 py-10 sm:px-10 sm:py-14">
+      <section className="hero hero-landing enter mt-8 overflow-hidden px-6 py-10 sm:px-10 sm:py-14">
         <p className="text-sm text-hero-muted">Personal ledger</p>
         <h1 className="mt-3 max-w-xl font-display text-4xl leading-tight text-hero-foreground sm:text-5xl">{HOME_H1}</h1>
         <p className="mt-4 max-w-xl text-base text-hero-muted">{HOME_DESCRIPTION}</p>
@@ -59,6 +59,8 @@ export function HomePage() {
           </a>
         </div>
       </section>
+
+      <MonthPreview />
 
       <ProseSection title="Who it is for">
         <p>
@@ -115,6 +117,46 @@ function FactList({ title, items }: { title: string; items: readonly string[] })
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+function MonthPreview() {
+  return (
+    <section className="month-preview enter enter-2 mt-6" aria-labelledby="month-preview-title">
+      <div className="month-preview-header">
+        <div>
+          <p className="month-preview-eyebrow">A clearer view of your month</p>
+          <h2 id="month-preview-title" className="font-display text-2xl text-foreground">See where the money went.</h2>
+        </div>
+        <span className="month-preview-badge">Illustrative example</span>
+      </div>
+      <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+        Add your own records to see a monthly picture like this. These figures are examples, not a real account or suggested budget.
+      </p>
+      <div className="month-preview-grid">
+        <div className="month-preview-balance">
+          <p className="text-sm text-muted-foreground">Remaining after expenses and savings</p>
+          <p className="month-preview-amount">₹25,000</p>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">₹80,000 income − ₹45,000 expenses − ₹10,000 savings</p>
+          <div className="month-preview-bar mt-7" role="img" aria-label="Example: 56.25 percent expenses, 12.5 percent savings, and 31.25 percent remaining from ₹80,000 income">
+            <span className="month-preview-segment month-preview-expenses" />
+            <span className="month-preview-segment month-preview-savings" />
+            <span className="month-preview-segment month-preview-remaining" />
+          </div>
+          <div className="month-preview-legend" aria-hidden="true">
+            <span><i className="month-preview-dot month-preview-dot-expenses" />Expenses</span>
+            <span><i className="month-preview-dot month-preview-dot-savings" />Savings</span>
+            <span><i className="month-preview-dot month-preview-dot-remaining" />Remaining</span>
+          </div>
+        </div>
+        <div className="month-preview-entries" aria-label="Illustrative ledger entries">
+          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-income" aria-hidden="true">+</span><span><strong>Pay</strong><small>Income recorded</small></span><b>+₹80,000</b></div>
+          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-expense" aria-hidden="true">−</span><span><strong>Groceries &amp; more</strong><small>Expenses recorded</small></span><b>−₹45,000</b></div>
+          <div className="month-preview-entry"><span className="month-preview-entry-icon month-preview-entry-icon-savings" aria-hidden="true">↗</span><span><strong>Money set aside</strong><small>Savings recorded</small></span><b>−₹10,000</b></div>
+        </div>
+      </div>
+      <a href="/budget-worksheet" className="month-preview-link">Try your own figures <span aria-hidden="true">→</span></a>
     </section>
   );
 }
