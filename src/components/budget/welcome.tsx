@@ -25,8 +25,8 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
   }
 
   return (
-    <main className="mx-auto grid min-h-screen w-full max-w-lg place-items-center px-4 py-10">
-      <div className="w-full">
+    <main className="mx-auto grid min-h-screen w-full max-w-5xl items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-12 lg:py-12">
+      <div className="order-1 w-full lg:order-2">
         <a href="/" className="flex items-center gap-3 rounded-md" aria-label="Clearbook home">
           <Mark className="size-14 shrink-0" />
           <div>
@@ -36,8 +36,11 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
         </a>
         <h1 className="mt-6 text-2xl font-medium text-foreground">{mode === "signup" ? "Create your account" : "Log in to your ledger"}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign in to see your own ledger. A new account starts at zero. Nobody else’s transactions, balances, or goals are on this screen.
+          {mode === "signup"
+            ? "Start with an empty ledger. Add your own records and see your month take shape."
+            : "Open your own records, budgets, and savings goals where you left off."}
         </p>
+        <p className="auth-quick-benefit">Track expenses <span aria-hidden="true">·</span> Set goals <span aria-hidden="true">·</span> Export your records</p>
         <form className="panel mt-4 grid gap-3 p-4" onSubmit={submit}>
           <div className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1">
             <button type="button" className={mode === "signup" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => setMode("signup")}>
@@ -80,6 +83,17 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
           Use the same email and password, or Google or X, to open this account on another device.
         </p>
       </div>
+      <section className="auth-story order-2 lg:order-1" aria-labelledby="auth-story-title">
+        <p className="auth-story-eyebrow">A ledger you actually understand</p>
+        <h2 id="auth-story-title" className="font-display text-3xl leading-tight sm:text-4xl">Make sense of the money you record.</h2>
+        <p className="mt-4 max-w-md text-sm leading-6 text-hero-muted">Write down income, spending, and savings. See what remains for the month, then come back to the same ledger on another device.</p>
+        <ul className="auth-story-list">
+          <li><span aria-hidden="true">01</span><div><strong>Record in your own way</strong><p>Add an amount, category, date, and optional note. No bank connection is required.</p></div></li>
+          <li><span aria-hidden="true">02</span><div><strong>Understand your month</strong><p>See the expenses you entered alongside budgets and savings goals you set.</p></div></li>
+          <li><span aria-hidden="true">03</span><div><strong>Keep a copy</strong><p>Export your own ledger to Excel from Settings when you need it.</p></div></li>
+        </ul>
+        <p className="mt-7 text-xs leading-5 text-hero-muted">Clearbook is a manual personal ledger. It does not read your bank messages or show a bank balance.</p>
+      </section>
     </main>
   );
 }
