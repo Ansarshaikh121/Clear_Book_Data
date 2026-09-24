@@ -533,7 +533,8 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: unknown) => {
     const row = asRecord(input);
-    const month = row?.month;
+    if (!row) throw new Error("Invalid statement");
+    const month = row.month;
     if (typeof month !== "string" || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error("Invalid month");
     if (!Array.isArray(row.transactions) || row.transactions.length === 0 || row.transactions.length > 300) throw new Error("Invalid statement size");
     const transactions = row.transactions.map((value: unknown) => {
