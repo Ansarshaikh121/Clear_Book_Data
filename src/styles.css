@@ -1043,3 +1043,57 @@
 }
 
 @keyframes hero-art-mobile { from { opacity: 0; transform: translateY(12px); } to { opacity: .42; transform: none; } }
+
+/* Original artwork stays decorative; live figures and links remain selectable HTML. */
+.home-motion .hero-landing {
+  background: #142d39;
+}
+.home-motion .hero-landing::before { content: none; }
+.home-motion .hero-landing::after { z-index: 0; }
+.home-motion .hero-landing > .hero-art-layer {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  max-width: none;
+  pointer-events: none;
+  background: linear-gradient(90deg, #142d39 2%, rgb(20 45 57 / .9) 33%, rgb(20 45 57 / .1) 77%), url("/hero-atmosphere.webp") center right / cover no-repeat;
+}
+.home-motion .hero-landing > p:first-of-type {
+  color: var(--color-hero-positive);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.home-motion .hero-landing > h1,
+.home-motion .hero-landing > h1 + p,
+.home-motion .hero-landing > .hero-actions,
+.home-motion .hero-landing > .hero-art-layer {
+  animation: none;
+}
+.home-motion .hero-landing > .hero-actions a {
+  transition: transform var(--motion-fast) var(--ease-smooth-out), box-shadow var(--motion-fast) ease, opacity var(--motion-fast);
+}
+.home-motion .month-preview::before {
+  background: linear-gradient(90deg, rgb(16 32 39 / .96), rgb(16 32 39 / .7)), url("/monthly-atmosphere.webp") center / cover no-repeat;
+}
+.home-motion .month-preview,
+.home-motion .month-preview-ring,
+.home-motion .month-preview-entry {
+  animation: none;
+}
+@media (max-width: 639px) {
+  .home-motion .hero-landing > .hero-art-layer {
+    background: linear-gradient(180deg, #142d39 4%, rgb(20 45 57 / .87) 40%, rgb(20 45 57 / .45)), url("/hero-atmosphere.webp") 64% center / cover no-repeat;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-motion .hero-landing > .hero-actions a,
+  .home-motion .month-preview-ring {
+    transition: none;
+  }
+  .home-motion .hero-landing > .hero-actions a:hover,
+  .home-motion .month-preview-ring:hover {
+    transform: none;
+  }
+}
