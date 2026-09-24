@@ -51,7 +51,7 @@ function resetMessage(url: string) {
   ].join("\n");
 }
 
-async function sendResend(config: Extract<MailConfig, { kind: "resend" }>, to: string, url: string) {
+async function sendResend(config: Extract<MailConfig, { kind: "resend" }>, to: string, url: string, subject = "Reset your Clearbook password", message = resetMessage(url)) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -61,8 +61,8 @@ async function sendResend(config: Extract<MailConfig, { kind: "resend" }>, to: s
     body: JSON.stringify({
       from: config.from,
       to: [to],
-      subject: "Reset your Clearbook password",
-      text: resetMessage(url),
+      subject,
+      text: message,
     }),
   });
   if (!response.ok) {
@@ -130,7 +130,7 @@ async function command(socket: net.Socket, reader: SmtpBuffer, line: string | nu
   if (!codes.includes(code)) throw new Error("SMTP refused a command");
 }
 
-async function authenticate(socket: net.Socket, reader: SmtpBuffer, config: Extract<MailConfig, { kind: "smtp" }>, to: string, url: string) {
+async function authenticate(socket: net.Socket, reader: SmtpBuffer, config: Extract<MailConfig, { kind: "smtp" }>, to: string, url: string, subject: string, message: string) {
   await command(socket, reader, "AUTH LOGIN", [334]);
   await command(socket, reader, Buffer.from(config.user).toString("base64"), [334]);
   await command(socket, reader, Buffer.from(config.pass).toString("base64"), [235]);
@@ -140,18 +140,18 @@ async function authenticate(socket: net.Socket, reader: SmtpBuffer, config: Extr
   const payload = [
     `From: ${config.from}`,
     `To: ${to}`,
-    "Subject: Reset your Clearbook password",
+    `Subject: ${subject}`,
     "MIME-Version: 1.0",
     "Content-Type: text/plain; charset=utf-8",
     "",
-    resetMessage(url).replace(/^\./gm, ".."),
+    message.replace(/^\./gm, ".."),
     ".",
   ].join("\r\n");
   await command(socket, reader, payload, [250]);
   await command(socket, reader, "QUIT", [221]);
 }
 
-async function sendSmtp(config: Extract<MailConfig, { kind: "smtp" }>, to: string, url: string) {
+async function sendSmtp(config: Extract<MailConfig, { kind: "smtp" }>, to: string, url: string, subject = "Reset your Clearbook password", message = resetMessage(url)) {
   const implicit = config.port === 465;
   const socket: net.Socket = implicit
     ? tls.connect({ host: config.host, port: config.port, servername: config.host })
@@ -182,11 +182,11 @@ async function sendSmtp(config: Extract<MailConfig, { kind: "smtp" }>, to: strin
         secure.once("error", reject);
       });
       await command(secure, secureReader, "EHLO clearbook", [250]);
-      await authenticate(secure, secureReader, config, to, url);
+      await authenticate(secure, secureReader, config, to, url, subject, message);
       secure.end();
       return;
     }
-    await authenticate(socket, reader, config, to, url);
+    await authenticate(socket, reader, config, to, url, subject, message);
   } finally {
     socket.end();
   }
@@ -283,4 +283,14 @@ export async function inspectResetToken(auth: AuthLike, token: string): Promise<
   const expires = new Date(row.expiresAt);
   if (!Number.isFinite(expires.getTime()) || expires.getTime() <= Date.now()) return "invalid";
   return "valid";
+}
+
+/** Never silently accept an OTP request when delivery is unavailable. */
+export async function deliverSignupOtp(email: string, otp: string): Promise<void> {
+  const config = readMailConfig();
+  if (!config) throw new Error("Email delivery is not configured");
+  const subject = "Verify your Clearbook email";
+  const message = `Your Clearbook verification code is ${otp}. It expires in 10 minutes.\n\nIf you did not request this code, ignore this email.`;
+  if (config.kind === "resend") await sendResend(config, email, "", subject, message);
+  else await sendSmtp(config, email, "", subject, message);
 }
