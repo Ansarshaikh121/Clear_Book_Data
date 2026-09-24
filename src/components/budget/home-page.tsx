@@ -164,6 +164,7 @@ export function HomePage() {
       <FactList title="Good to know" items={LIMITS} />
       </div>
       <section className="home-final"><span className="home-section-number">START HERE</span><h2>Your next month can be clearer.</h2><p>Try the worksheet first, or create an account and begin with your own records.</p><div><a href="/login">Create account <span aria-hidden="true">↗</span></a><a href="/budget-worksheet">Try the worksheet <span aria-hidden="true">→</span></a></div></section>
+      </div>
     </PublicShell>
   );
 }
