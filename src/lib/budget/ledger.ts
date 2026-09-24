@@ -4,6 +4,7 @@ import {
   AMOUNT_MESSAGE,
   CATEGORIES,
   currentMonthKey,
+  isCategoryForKind,
   isPositiveCents,
   type CurrencyCode,
   type Goal,
@@ -71,7 +72,7 @@ export function parseTransaction(value: unknown): Transaction | null {
   if (typeof kind !== "string" || !KINDS.has(kind as Kind)) return null;
   if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   if (typeof amount !== "number" || !isPositiveCents(amount)) return null;
-  if (typeof categoryId !== "string" || !CATEGORY_IDS.has(categoryId)) return null;
+  if (typeof categoryId !== "string" || !isCategoryForKind(categoryId, kind as Kind)) return null;
   if (typeof row.id !== "string" || row.id.length < 4 || row.id.length > 80) return null;
   const note = typeof row.note === "string" ? row.note.trim().slice(0, 80) : "";
   const merchant = typeof row.merchant === "string" && row.merchant.trim() ? row.merchant.trim().slice(0, 60) : undefined;
