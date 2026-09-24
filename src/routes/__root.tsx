@@ -3,6 +3,7 @@ import { NotFoundPage } from "@/components/budget/not-found-page";
 import { Frame } from "@/components/budget/frame";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
+import { AnalyticsConsent } from "@/components/analytics-consent";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "Clearbook";
@@ -41,6 +42,7 @@ export const Route = createRootRoute({
       </head>
       <body className="antialiased">
         <PreviewHostBridge />
+        <AnalyticsConsent />
         <AuthProvider>
           <Frame>
             <Outlet />
