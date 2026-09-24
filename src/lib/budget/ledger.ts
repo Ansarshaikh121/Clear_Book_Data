@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
+import { parseStatementDate } from "@/lib/budget/bank-statement";
 import {
   AMOUNT_MESSAGE,
   CATEGORIES,
@@ -568,7 +569,7 @@ export const importBankTransactions = createServerFn({ method: "POST" })
     }
     const transactions = row.transactions.map((value: unknown) => {
       const tx = parseTransaction(value);
-      if (!tx || !/^bank-[a-f0-9]{32}-[0-9]{1,5}$/.test(tx.id) || tx.kind === "savings") {
+      if (!tx || !/^bank-[a-f0-9]{32}-[0-9]{1,5}$/.test(tx.id) || tx.kind === "savings" || !tx.note || parseStatementDate(tx.date) !== tx.date) {
         throw new Error("Invalid bank statement transaction.");
       }
       return tx;
