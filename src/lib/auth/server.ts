@@ -30,7 +30,8 @@
  * a verified id via `@/lib/auth/middleware`.
  */
 import { betterAuth } from "better-auth";
-import { bearer, genericOAuth } from "better-auth/plugins";
+import { bearer, emailOTP, genericOAuth } from "better-auth/plugins";
+import { deliverSignupOtp } from "../mail/deliver.server";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
 import { randomBytes } from "node:crypto";
@@ -249,7 +250,7 @@ export const auth = betterAuth({
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
   // Local email/password — toggled only via `./email-password` (not a plugin).
-  ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true } } : {}),
+  ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true, requireEmailVerification: true, autoSignIn: false } } : {}),
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a
@@ -270,6 +271,16 @@ export const auth = betterAuth({
   },
 
   plugins: [
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 600,
+      allowedAttempts: 5,
+      sendVerificationOnSignUp: true,
+      async sendVerificationOTP({ email, otp, type }) {
+        if (type !== "email-verification") return;
+        await deliverSignupOtp(email, otp);
+      },
+    }),
     gateIdentitySessions(),
 
     // One genericOAuth provider per upstream (when auth is on), all federating
