@@ -4,6 +4,7 @@ import {
   AMOUNT_MESSAGE,
   comparePeriodWindows,
   comparisonNoteForRange,
+  isCategoryForKind,
   isPositiveCents,
   parseMajorAmount,
   periodBounds,
@@ -38,6 +39,22 @@ test("negative, zero, empty, and non-numeric amounts are rejected without becomi
   assert.equal(parseMajorAmount("1.15"), 115);
   assert.equal(parseMajorAmount("0.01"), 1);
   assert.equal(AMOUNT_MESSAGE, "Enter an amount greater than zero.");
+});
+
+test("server amount limit fits PostgreSQL integer cents columns", () => {
+  assert.equal(isPositiveCents(2_147_483_647), true);
+  assert.equal(isPositiveCents(2_147_483_648), false);
+  assert.equal(parseMajorAmount("21474836.47"), 2_147_483_647);
+  assert.equal(parseMajorAmount("21474836.48"), null);
+});
+
+test("category belongs to transaction kind", () => {
+  assert.equal(isCategoryForKind("pay", "income"), true);
+  assert.equal(isCategoryForKind("groceries", "expense"), true);
+  assert.equal(isCategoryForKind("savings", "savings"), true);
+  assert.equal(isCategoryForKind("pay", "expense"), false);
+  assert.equal(isCategoryForKind("groceries", "income"), false);
+  assert.equal(isCategoryForKind("missing", "income"), false);
 });
 
 test("a refund stays a positive income record and is not a negative expense", () => {
