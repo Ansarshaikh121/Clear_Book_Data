@@ -129,6 +129,9 @@ function MonthPreview() {
   const expenses = 45_000;
   const [savings, setSavings] = useState(10_000);
   const remaining = income - expenses - savings;
+  const expenseShare = expenses / income * 100;
+  const savingsShare = savings / income * 100;
+  const remainingShare = remaining / income * 100;
   const money = (amount: number) => previewMoney.format(amount);
 
   return (
@@ -148,10 +151,29 @@ function MonthPreview() {
           <p className="text-sm text-muted-foreground">Remaining after expenses and savings</p>
           <output className="month-preview-amount block" aria-live="polite">{money(remaining)}</output>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">{money(income)} income − {money(expenses)} expenses − {money(savings)} savings</p>
-          <div className="month-preview-bar mt-7" role="img" aria-label={`Example: ${money(expenses)} expenses, ${money(savings)} savings, and ${money(remaining)} remaining from ${money(income)} income`}>
-            <span className="month-preview-segment month-preview-expenses" style={{ width: `${expenses / income * 100}%` }} />
-            <span className="month-preview-segment month-preview-savings" style={{ width: `${savings / income * 100}%` }} />
-            <span className="month-preview-segment month-preview-remaining" style={{ width: `${remaining / income * 100}%` }} />
+          <div className="month-preview-visual">
+            <div
+              className="month-preview-ring"
+              style={{ background: `conic-gradient(var(--color-expense) 0% ${expenseShare}%, var(--color-savings) ${expenseShare}% ${expenseShare + savingsShare}%, var(--color-income) ${expenseShare + savingsShare}% 100%)` }}
+              role="img"
+              aria-label={`Example allocation of ${money(income)} income: ${money(expenses)} expenses, ${money(savings)} savings, and ${money(remaining)} remaining`}
+            >
+              <div className="month-preview-ring-center" aria-hidden="true">
+                <span>Still available</span>
+                <strong>{money(remaining)}</strong>
+                <small>{Math.round(remainingShare)}% of income</small>
+              </div>
+            </div>
+            <div className="month-preview-visual-note">
+              <span className="month-preview-visual-kicker">One month, at a glance</span>
+              <strong>See the whole picture.</strong>
+              <span>Move the savings slider below to see what changes.</span>
+            </div>
+          </div>
+          <div className="month-preview-bar mt-5" role="img" aria-label={`Example: ${money(expenses)} expenses, ${money(savings)} savings, and ${money(remaining)} remaining from ${money(income)} income`}>
+            <span className="month-preview-segment month-preview-expenses" style={{ width: `${expenseShare}%` }} />
+            <span className="month-preview-segment month-preview-savings" style={{ width: `${savingsShare}%` }} />
+            <span className="month-preview-segment month-preview-remaining" style={{ width: `${remainingShare}%` }} />
           </div>
           <div className="month-preview-legend" aria-hidden="true">
             <span><i className="month-preview-dot month-preview-dot-expenses" />Expenses</span>
