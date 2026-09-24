@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard
+Disallow: /transactions
+Disallow: /budgets
+Disallow: /goals
+Disallow: /reports
+Disallow: /insights
+Disallow: /settings
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /api/
+
+Sitemap: https://clearbookdata.in/sitemap.xml
