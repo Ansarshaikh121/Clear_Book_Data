@@ -1,4 +1,4 @@
-import { isPositiveCents, type Kind, type Transaction } from "./model";
+import { isPositiveCents, type Kind, type Transaction } from "./model.ts";
 
 export type StatementRow = Omit<Transaction, "id"> & {
   sourceRow: number;
@@ -129,7 +129,7 @@ export function parseStatementRows(table: string[][]): StatementParse {
     if (!date || !description || !isPositiveCents(cents)) { skipped++; continue; }
     const review = /self transfer|own account|fund transfer|credit card payment|loan payment|transfer to self/i.test(description);
     rows.push({ sourceRow: index + 1, date, note: description, kind, amountCents: cents, categoryId: classify(description, kind), review, reason: review ? "Possible transfer or repayment" : undefined });
-    if (rows.length > 2000) throw new Error("Statement is too large. Please upload up to 2,000 transactions.");
+    if (rows.length > 500) throw new Error("Statement is too large. Please upload up to 500 transactions.");
   }
   if (!rows.length) throw new Error("No valid transactions found. Check the statement columns and dates.");
   return { rows, skipped, headers };
