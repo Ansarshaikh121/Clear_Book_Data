@@ -27,11 +27,26 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
           name: name.trim() || "Clearbook",
         });
         if (result.error) throw new Error(result.error.message || "Could not create account.");
+        if (result.data?.token) {
+          window.location.assign("/dashboard");
+          return;
+        }
         setVerificationEmail(email.trim().toLowerCase());
         setVerified(false);
       } else {
         const result = await authClient.signIn.email({ email, password, callbackURL: "/dashboard" });
-        if (result.error) throw new Error(result.error.message || "Could not sign in.");
+        if (result.error) {
+          const unverified = result.error.code === "EMAIL_NOT_VERIFIED" || /not verified/i.test(result.error.message || "");
+          if (unverified) {
+            const address = email.trim().toLowerCase();
+            const sent = await authClient.emailOtp.sendVerificationOtp({ email: address, type: "email-verification" });
+            if (sent.error) throw new Error(sent.error.message || "Could not send a verification code.");
+            setVerificationEmail(address);
+            setVerified(false);
+            return;
+          }
+          throw new Error(result.error.message || "Could not sign in.");
+        }
         window.location.assign("/dashboard");
       }
     } catch (cause) {

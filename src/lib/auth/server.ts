@@ -31,7 +31,7 @@
  */
 import { betterAuth } from "better-auth";
 import { bearer, emailOTP, genericOAuth } from "better-auth/plugins";
-import { deliverSignupOtp } from "../mail/deliver.server";
+import { deliverSignupOtp, readMailConfig } from "../mail/deliver.server";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
 import { randomBytes } from "node:crypto";
@@ -258,8 +258,16 @@ export const auth = betterAuth({
   // flicker-prevention guidance (gate on `isPending`; SSR the session).
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
-  // Local email/password — toggled only via `./email-password` (not a plugin).
-  ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true, requireEmailVerification: true, autoSignIn: false } } : {}),
+  // Email codes are required only when mail can actually be sent. Without
+  // Resend or SMTP, requiring verification would lock password accounts out.
+  ...(emailAndPasswordEnabled
+    ? {
+        emailAndPassword: {
+          enabled: true,
+          ...(readMailConfig() ? { requireEmailVerification: true, autoSignIn: false } : {}),
+        },
+      }
+    : {}),
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a
