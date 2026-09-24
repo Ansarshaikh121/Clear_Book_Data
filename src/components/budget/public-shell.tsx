@@ -15,9 +15,9 @@ export function PublicShell({ path, children }: { path: string; children: ReactN
         Skip to content
       </a>
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <a href="/" className="flex items-center gap-3 rounded-md" aria-label="Clearbook home">
+        <a href="/" className="public-brand flex items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background" aria-label="Clearbook home">
           <Mark className="size-11 shrink-0" />
-          <span className="wordmark text-foreground">Clearbook</span>
+          <span className="wordmark public-wordmark text-foreground">Clearbook</span>
         </a>
         <nav aria-label="Account" className="flex flex-wrap items-center gap-2">
           <a
@@ -34,7 +34,7 @@ export function PublicShell({ path, children }: { path: string; children: ReactN
           </a>
         </nav>
       </header>
-      <nav aria-label="Pages" className="mt-4 flex gap-1 overflow-x-auto pb-1">
+      <nav aria-label="Pages" className="mt-4 flex gap-1 overflow-x-auto pb-2">
         {NAV.map((item) => {
           const current = item.path === path;
           return (
@@ -42,11 +42,8 @@ export function PublicShell({ path, children }: { path: string; children: ReactN
               key={item.path}
               href={item.path}
               aria-current={current ? "page" : undefined}
-              className={
-                current
-                  ? "press inline-flex h-11 shrink-0 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground"
-                  : "press inline-flex h-11 shrink-0 items-center rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-              }
+              className={`public-nav-link ${current ? "public-nav-link-current" : ""}`}
+
             >
               {item.crumb}
             </a>
