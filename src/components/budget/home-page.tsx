@@ -175,7 +175,7 @@ function MonthPreview() {
   const money = (amount: number) => previewMoney.format(amount);
 
   return (
-    <section className="month-preview enter enter-2 mt-6" aria-labelledby="month-preview-title">
+    <section className="month-preview mt-6" aria-labelledby="month-preview-title">
       <div className="month-preview-header">
         <div>
           <p className="month-preview-eyebrow">A clearer view of your month</p>
