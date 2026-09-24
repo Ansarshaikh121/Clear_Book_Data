@@ -591,7 +591,7 @@ export const importBankTransactions = createServerFn({ method: "POST" })
       const result = await sql<{ id: string }>`
         insert into ledger_transactions (id, user_id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date)
         values (${tx.id}, ${context.userId}, ${tx.kind}, ${tx.amountCents}, ${tx.categoryId}, ${tx.note}, null, null, ${tx.date})
-        on conflict (user_id, id) do nothing
+        on conflict do nothing
         returning id
       `;
       if (result.length) added++;
