@@ -4,6 +4,7 @@ import { Copy, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { useEditor } from "@/components/budget/frame";
+import { BankStatementImport } from "@/components/budget/bank-statement-import";
 import { CATEGORIES, categoryById, categoryColor, formatDay, formatMoney, periodBounds, periodLabel, summarizeRange, transactionWindow, type CurrencyCode, type Kind, type Transaction } from "@/lib/budget/model";
 import { useBudget } from "@/lib/budget/store";
 
@@ -127,6 +128,7 @@ export function TransactionsPage() {
         <Total label="Saved" value={formatMoney(rangeSummary.savings, currency)} />
         <Total label="Remaining" value={formatMoney(rangeSummary.remaining, currency)} />
       </dl>
+      <BankStatementImport />
       <label className="mt-4 grid gap-1 text-sm">
         <span className="sr-only">Search transactions</span>
         <input className="field" type="search" value={query} placeholder="Search transactions" onChange={(event) => setQuery(event.target.value)} />

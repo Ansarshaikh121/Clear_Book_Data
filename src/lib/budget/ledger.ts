@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
+import { parseStatementDate } from "@/lib/budget/bank-statement";
 import {
   AMOUNT_MESSAGE,
   CATEGORIES,
@@ -553,4 +554,49 @@ export const importOwnedLedger = createServerFn({ method: "POST" })
       `;
     }
     return readSnapshot(context.userId);
+  });
+
+/**
+ * Confirmed bank statement rows only. Parse the file in the browser; the server
+ * validates each transaction again and scopes duplicate checks to the owner.
+ */
+export const importBankTransactions = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((input: unknown) => {
+    const row = asRecord(input);
+    if (!row || row.confirm !== true || !Array.isArray(row.transactions) || row.transactions.length < 1 || row.transactions.length > 500) {
+      throw new Error("Choose up to 500 transactions and confirm the import.");
+    }
+    const transactions = row.transactions.map((value: unknown) => {
+      const tx = parseTransaction(value);
+      if (!tx || !/^bank-[a-f0-9]{32}-[0-9]{1,5}$/.test(tx.id) || tx.kind === "savings" || !tx.note || parseStatementDate(tx.date) !== tx.date) {
+        throw new Error("Invalid bank statement transaction.");
+      }
+      return tx;
+    });
+    return transactions;
+  })
+  .handler(async ({ context, data }) => {
+    const sql = await db();
+    let added = 0;
+    let duplicates = 0;
+    for (const tx of data) {
+      const previous = await sql<{ id: string }>`
+        select id from ledger_transactions
+        where user_id = ${context.userId} and tx_date = ${tx.date} and kind = ${tx.kind}
+          and amount_cents = ${tx.amountCents}
+          and lower(trim(note)) = lower(trim(${tx.note}))
+        limit 1
+      `;
+      if (previous.length) { duplicates++; continue; }
+      const result = await sql<{ id: string }>`
+        insert into ledger_transactions (id, user_id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date)
+        values (${tx.id}, ${context.userId}, ${tx.kind}, ${tx.amountCents}, ${tx.categoryId}, ${tx.note}, null, null, ${tx.date})
+        on conflict do nothing
+        returning id
+      `;
+      if (result.length) added++;
+      else duplicates++;
+    }
+    return { added, duplicates, snapshot: await readSnapshot(context.userId) };
   });
