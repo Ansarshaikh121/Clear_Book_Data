@@ -575,6 +575,42 @@ export const importStatementTransactions = createServerFn({ method: "POST" })
     return { added, skipped, snapshot: await readSnapshot(context.userId) };
   });
 
+
+/** Delete only this account's ledger data. Confirmation is enforced server-side. */
+export const resetLedgerData = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((input: unknown) => {
+    if (asRecord(input)?.confirm !== "RESET") throw new Error("Reset must be confirmed");
+    return true;
+  })
+  .handler(async ({ context }): Promise<LedgerSnapshot> => {
+    const sql = await db();
+    const defaults = emptySettings();
+    const month = currentMonthKey();
+    // One statement keeps the ledger reset atomic on both Neon and PGLite.
+    await sql`
+      with deleted_transactions as (
+        delete from ledger_transactions where user_id = ${context.userId} returning id
+      ), deleted_goals as (
+        delete from ledger_goals where user_id = ${context.userId} returning id
+      ), deleted_exports as (
+        delete from ledger_export_log where user_id = ${context.userId} returning id
+      ), reset_profile as (
+        update ledger_profiles
+        set budgets = '[]', recurring = '[]', calendar = ${JSON.stringify(defaults.calendar)},
+            view_month = ${month}
+        where user_id = ${context.userId}
+        returning user_id
+      )
+      select
+        (select count(*) from deleted_transactions) as transactions_deleted,
+        (select count(*) from deleted_goals) as goals_deleted,
+        (select count(*) from deleted_exports) as exports_deleted,
+        (select count(*) from reset_profile) as profiles_reset
+    `;
+    return readSnapshot(context.userId);
+  });
+
 export const importOwnedLedger = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: unknown) => {
