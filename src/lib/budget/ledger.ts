@@ -20,11 +20,11 @@ import type {
   Settings,
 } from "@/lib/budget/store";
 
-const CARD_ORDER: OverviewCardId[] = ["snapshot", "stats", "rhythm", "breakdown", "goals", "notes", "recent"];
+const CARD_ORDER: OverviewCardId[] = ["snapshot", "stats", "breakdown", "recent", "rhythm", "goals", "notes"];
 
 function emptySettings(): Settings {
   return {
-    theme: "light",
+    theme: "dark",
     monthStartsOn: 1,
     cardOrder: [...CARD_ORDER],
     budgets: [],
@@ -180,12 +180,13 @@ function parseSettings(value: unknown): Settings {
   const base = emptySettings();
   const row = asRecord(value);
   if (!row) return base;
-  const theme = row.theme === "dark" ? "dark" : "light";
+  const theme = row.theme === "light" ? "light" : "dark";
   const monthStartsOn = typeof row.monthStartsOn === "number" ? Math.min(28, Math.max(1, Math.round(row.monthStartsOn))) : 1;
   const cardOrder = Array.isArray(row.cardOrder)
     ? (row.cardOrder.filter((id) => CARD_ORDER.includes(id as OverviewCardId)) as OverviewCardId[])
     : [];
   const order = [...cardOrder, ...CARD_ORDER.filter((id) => !cardOrder.includes(id))];
+  if (order.join(",") === "snapshot,stats,rhythm,breakdown,goals,notes,recent") order.splice(0, order.length, ...CARD_ORDER);
   const budgets = Array.isArray(row.budgets)
     ? row.budgets.flatMap((item) => {
         const budget = asRecord(item);
@@ -289,7 +290,7 @@ async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
     values (
       ${userId},
       'INR',
-      'light',
+      'dark',
       1,
       ${JSON.stringify(defaults.cardOrder)},
       '[]',
@@ -521,6 +522,57 @@ export const saveLedgerProfile = createServerFn({ method: "POST" })
         view_month = excluded.view_month
     `;
     return data;
+  });
+
+
+function statementReference(note: string): string {
+  return /(?:UPI\s*\/\s*(?:DR|CR)\s*\/\s*\d+|IMPS\/[A-Z0-9]+|NEFT\/[A-Z0-9]+|IFT\/\d+|POS-VISA\/[^/]*\/\d+|ATM-NFS\/[^/]*\/[^/]*\/\d+|\b\d{10,}\b)/i.exec(note)?.[0]?.toUpperCase().replace(/\s+/g, "") ?? "";
+}
+
+/** Import only validated transactions belonging to the signed-in account. */
+export const importStatementTransactions = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((input: unknown) => {
+    const row = asRecord(input);
+    if (!row) throw new Error("Invalid statement");
+    const month = row.month;
+    if (typeof month !== "string" || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error("Invalid month");
+    if (!Array.isArray(row.transactions) || row.transactions.length === 0 || row.transactions.length > 300) throw new Error("Invalid statement size");
+    const transactions = row.transactions.map((value: unknown) => {
+      const tx = parseTransaction(value);
+      if (!tx || !tx.id.startsWith("stmt-idfc-") || tx.date.slice(0, 7) !== month || tx.kind === "savings" || tx.goalId) throw new Error("Invalid statement row");
+      return tx;
+    });
+    return { month, transactions };
+  })
+  .handler(async ({ context, data }) => {
+    const sql = await db();
+    const existing = await sql<TxRow>`
+      select id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date
+      from ledger_transactions where user_id = ${context.userId}
+    `;
+    const seenIds = new Set(existing.map((row) => row.id));
+    const seenReferences = new Set(existing.flatMap((row) => {
+      const reference = statementReference(row.note);
+      return reference ? [`${row.kind}:${row.amount_cents}:${reference}`] : [];
+    }));
+    let added = 0;
+    let skipped = 0;
+    for (const tx of data.transactions) {
+      const reference = statementReference(tx.note);
+      const key = reference ? `${tx.kind}:${tx.amountCents}:${reference}` : "";
+      // Legacy manual entries can have a bank reference despite a random id.
+      if (seenIds.has(tx.id) || (key && seenReferences.has(key)) || (reference && existing.some((row) => row.kind === tx.kind && Number(row.amount_cents) === tx.amountCents && row.note.includes(reference.match(/\\d{10,}/)?.[0] ?? "\u0000")))) { skipped++; continue; }
+      const inserted = await sql<{ id: string }>`
+        insert into ledger_transactions (id, user_id, kind, amount_cents, category_id, note, merchant, goal_id, tx_date)
+        values (${tx.id}, ${context.userId}, ${tx.kind}, ${tx.amountCents}, ${tx.categoryId},
+                ${tx.note}, ${tx.merchant ?? null}, null, ${tx.date})
+        on conflict (user_id, id) do nothing returning id
+      `;
+      if (inserted.length) { added++; seenIds.add(tx.id); if (key) seenReferences.add(key); }
+      else skipped++;
+    }
+    return { added, skipped, snapshot: await readSnapshot(context.userId) };
   });
 
 export const importOwnedLedger = createServerFn({ method: "POST" })

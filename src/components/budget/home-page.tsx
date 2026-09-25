@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ChartNoAxesCombined, Download, PencilLine } from "lucide-react";
 import { PublicShell, ProseSection } from "@/components/budget/public-shell";
 import { HOME_DESCRIPTION, HOME_H1 } from "@/lib/seo";
 
@@ -22,7 +23,7 @@ const ACCOUNT = [
 ] as const;
 
 const LIMITS = [
-  "Clearbook does not connect to a bank, and it does not read bank or UPI text messages.",
+  "Clearbook does not connect to a bank or read bank and UPI messages. A supported current-month statement PDF can be imported from your account.",
   "A currency label changes the symbol only. Amounts are not converted.",
   "Google Calendar is not connected. A calendar file you download does not stay in sync.",
   "Records are saved with your account on the server. Clearbook does not use end-to-end encryption.",
@@ -50,54 +51,54 @@ export function HomePage() {
       const media = gsap.matchMedia();
       media.add("(prefers-reduced-motion: no-preference)", () => {
         const context = gsap.context(() => {
-          gsap.from(".hero-art-layer", { opacity: 0, scale: 1.08, duration: 1.25, ease: "power2.out" });
-          gsap.from(".hero-landing > p, .hero-landing > h1, .hero-landing > .hero-actions", {
-            opacity: 0, y: 18, duration: 0.68, stagger: 0.12, ease: "power2.out",
-          });
-          gsap.from(".month-preview", {
-            opacity: 0, y: 26, duration: 0.75, ease: "power2.out",
-            scrollTrigger: { trigger: ".month-preview", start: "top 88%", once: true },
-          });
-          gsap.from(".month-preview-ring", {
-            opacity: 0, scale: 0.88, rotate: -12, duration: 0.8, ease: "back.out(1.2)",
-            scrollTrigger: { trigger: ".month-preview-visual", start: "top 85%", once: true },
-          });
-          gsap.from(".home-step-card", { opacity: 0, y: 22, stagger: 0.1, duration: 0.65, ease: "power2.out", scrollTrigger: { trigger: ".home-steps", start: "top 85%", once: true } });
-          gsap.from(".month-preview-entry", {
-            opacity: 0, y: 14, stagger: 0.09, duration: 0.55, ease: "power2.out",
-            scrollTrigger: { trigger: ".month-preview-entries", start: "top 90%", once: true },
-          });
+          gsap.from(".redesign-hero .hero-copy > *", { opacity: 0, y: 4, duration: 0.2, stagger: 0.06, ease: "power2.out" });
+          for (const selector of [".redesign-feature-section", ".home-steps"]) {
+            gsap.from(`${selector} .home-step-card`, {
+              opacity: 0, y: 4, duration: 0.2, stagger: 0.06, ease: "power2.out",
+              scrollTrigger: { trigger: selector, start: "top 85%", once: true },
+            });
+          }
         }, motionScope);
         return () => context.revert();
       });
       cleanup = () => media.revert();
-    }).catch(() => {
-      // Content stays visible when animation code cannot load.
-    });
+    }).catch(() => { /* Content remains visible if motion does not load. */ });
     return () => { disposed = true; cleanup(); };
   }, []);
 
   return (
     <PublicShell path="/">
       <div ref={motionScope} className="home-motion">
-      <section className="hero hero-landing mt-8 overflow-hidden px-6 py-10 sm:px-10 sm:py-14">
-        <div className="hero-art-layer" aria-hidden="true" />
-        <p className="text-sm text-hero-muted">Personal ledger</p>
-        <h1 className="mt-3 max-w-xl font-display text-4xl leading-tight text-hero-foreground sm:text-5xl">{HOME_H1}</h1>
-        <p className="mt-4 max-w-xl text-base text-hero-muted">{HOME_DESCRIPTION}</p>
-        <div className="hero-actions mt-6 flex flex-wrap gap-3">
-          <a
-            href="/login"
-            className="press inline-flex h-11 items-center rounded-md bg-hero-foreground px-4 text-sm font-medium text-hero hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hero-foreground"
-          >
-            Create account
-          </a>
-          <a
-            href="/budget-worksheet"
-            className="press inline-flex h-11 items-center rounded-md border border-white/20 px-4 text-sm font-medium text-hero-foreground hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hero-foreground"
-          >
-            Try the worksheet
-          </a>
+      <section className="hero hero-landing redesign-hero mt-8" aria-labelledby="home-headline">
+        <div className="hero-copy">
+          <p className="redesign-eyebrow">A personal ledger, made for real life</p>
+          <h1 id="home-headline">{HOME_H1}</h1>
+          <p className="redesign-hero-description">{HOME_DESCRIPTION} Start with manual entries, then see the month clearly.</p>
+          <div className="hero-actions">
+            <a href="/login" className="press redesign-primary">Create account <span aria-hidden="true">↗</span></a>
+            <a href="/login?mode=login" className="press redesign-secondary">Log in</a>
+          </div>
+          <p className="redesign-hero-note">Your ledger starts empty. The preview is illustrative.</p>
+        </div>
+        <div className="redesign-mock" aria-label="Example Clearbook dashboard, not real account data">
+          <div className="redesign-mock-top"><span>MONTHLY OVERVIEW</span><span>EXAMPLE DATA</span></div>
+          <p>Remaining this month</p>
+          <ExampleBalance />
+          <div className="redesign-mock-bars" aria-hidden="true"><span /><span /><span /><span /><span /><span /><span /><span /><span /></div>
+          <div className="redesign-mock-stats">
+            <div><span>Income</span><strong>₹80,000</strong></div>
+            <div><span>Expenses</span><strong>₹45,000</strong></div>
+            <div><span>Savings</span><strong>₹10,000</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="redesign-feature-section" aria-labelledby="redesign-features-heading">
+        <div className="home-section-heading"><span className="home-section-number">01 / THE ESSENTIALS</span><h2 id="redesign-features-heading">Everything in one clear view.</h2></div>
+        <div className="home-step-grid">
+          <article className="home-step-card"><PencilLine aria-hidden="true" /><h3>Record your way</h3><p>Add income, expenses, and savings on the dates they happened.</p></article>
+          <article className="home-step-card"><ChartNoAxesCombined aria-hidden="true" /><h3>Understand your month</h3><p>See categories, budgets, and what remains after the amounts you recorded.</p></article>
+          <article className="home-step-card"><Download aria-hidden="true" /><h3>Keep a copy</h3><p>Export your own ledger to Excel from Settings whenever you need it.</p></article>
         </div>
       </section>
 
@@ -126,7 +127,7 @@ export function HomePage() {
           Clearbook is for a person tracking their own money: salary or other income, everyday expenses, and amounts set aside. Amounts display in rupees unless you change the symbol. It is not accounting software, and it does not prepare GST invoices, business books, or tax returns.
         </p>
         <p>
-          It also does not import transactions. If you want an app that reads bank SMS, this is the wrong product. You type each record yourself.
+          You can type each record yourself. For supported text-based IDFC FIRST Bank PDFs, the signed-in Transactions page can import entries for the current month. Clearbook does not connect to your bank or read bank SMS.
         </p>
       </ProseSection>
 
@@ -264,4 +265,22 @@ function MonthPreview() {
       <a href="/budget-worksheet" className="month-preview-link">Try your own figures <span aria-hidden="true">→</span></a>
     </section>
   );
+}
+
+function ExampleBalance() {
+  const [amount, setAmount] = useState(25_000);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const started = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - started) / 400);
+      setAmount(Math.round(25_000 * (1 - Math.pow(1 - progress, 3))));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    setAmount(0);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  return <strong className="redesign-mock-balance">{previewMoney.format(amount)}</strong>;
 }

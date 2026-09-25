@@ -58,16 +58,16 @@ export type Settings = {
 export const DEFAULT_CARD_ORDER: OverviewCardId[] = [
   "snapshot",
   "stats",
-  "rhythm",
   "breakdown",
+  "recent",
+  "rhythm",
   "goals",
   "notes",
-  "recent",
 ];
 
 export function defaultSettings(): Settings {
   return {
-    theme: "light",
+    theme: "dark",
     monthStartsOn: 1,
     cardOrder: [...DEFAULT_CARD_ORDER],
     budgets: [],
@@ -167,6 +167,7 @@ export function migrateBudget(persisted: unknown): Pick<BudgetState, "transactio
     ...settings.cardOrder.filter((id) => known.has(id)),
     ...DEFAULT_CARD_ORDER.filter((id) => !settings.cardOrder.includes(id)),
   ];
+  if (settings.cardOrder.join(",") === "snapshot,stats,rhythm,breakdown,goals,notes,recent") settings.cardOrder = [...DEFAULT_CARD_ORDER];
   settings.monthStartsOn = Math.min(28, Math.max(1, Math.round(settings.monthStartsOn) || 1));
   const calendar = { ...defaultSettings().calendar, ...(state.settings?.calendar ?? {}) };
   if (calendar.mode !== "daily" && calendar.mode !== "individual") calendar.mode = "daily";
