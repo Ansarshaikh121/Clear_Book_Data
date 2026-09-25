@@ -89,8 +89,8 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
   }
 
   return (
-    <main className="mx-auto grid min-h-screen w-full max-w-5xl items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-12 lg:py-12">
-      <div className="order-1 w-full lg:order-2">
+    <main className="auth-redesign mx-auto grid min-h-screen w-full max-w-6xl items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-12 lg:py-12">
+      <div className="auth-card order-1 w-full lg:order-2">
         <a href="/" className="flex items-center gap-3 rounded-md" aria-label="Clearbook home">
           <Mark className="size-14 shrink-0" />
           <div>
@@ -107,22 +107,22 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
         <p className="auth-quick-benefit">Track expenses <span aria-hidden="true">·</span> Set goals <span aria-hidden="true">·</span> Export your records</p>
         {verified ? <p className="mt-4 rounded-md bg-muted px-4 py-3 text-sm" role="status">Email verified. Log in with your password to open your ledger.</p> : null}
         {verificationEmail ? (
-          <form className="panel mt-4 grid gap-3 p-4" onSubmit={verify}>
+          <form className="panel mt-4 grid gap-3 p-4" onSubmit={verify} aria-busy={pending}>
             <p className="text-sm">We sent a verification code to <strong>{verificationEmail}</strong>. Enter it within 10 minutes to activate your account.</p>
             <label className="grid gap-1 text-sm font-medium">Verification code
               <input className="field" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={otp} onChange={(event) => setOtp(event.target.value)} />
             </label>
             {error ? <p className="text-sm text-negative" role="alert">{error}</p> : null}
-            <Button type="submit" disabled={pending}>{pending ? "Please wait…" : "Verify email"}</Button>
+            <Button type="submit" disabled={pending}>{pending ? <><span className="auth-spinner" aria-hidden="true" /> Verifying…</> : "Verify email"}</Button>
             <button type="button" className="text-sm font-medium text-primary underline-offset-2 hover:underline" onClick={resend} disabled={pending}>Resend code</button>
             <button type="button" className="text-sm text-muted-foreground underline-offset-2 hover:underline" onClick={() => { setVerificationEmail(""); setOtp(""); setError(""); }}>Use a different email</button>
           </form>
-        ) : <form className="panel mt-4 grid gap-3 p-4" onSubmit={submit}>
+        ) : <form className="panel mt-4 grid gap-3 p-4" onSubmit={submit} aria-busy={pending}>
           <div className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1">
-            <button type="button" className={mode === "signup" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => { setMode("signup"); setVerificationEmail(""); setError(""); setVerified(false); }}>
+            <button type="button" aria-pressed={mode === "signup"} className={mode === "signup" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => { setMode("signup"); setVerificationEmail(""); setError(""); setVerified(false); }}>
               Create account
             </button>
-            <button type="button" className={mode === "login" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => { setMode("login"); setVerificationEmail(""); setError(""); }}>
+            <button type="button" aria-pressed={mode === "login"} className={mode === "login" ? "press h-11 rounded-sm bg-card text-sm font-medium" : "press h-11 rounded-sm text-sm text-muted-foreground"} onClick={() => { setMode("login"); setVerificationEmail(""); setError(""); }}>
               Log in
             </button>
           </div>
@@ -146,7 +146,7 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
             </Link>
           ) : null}
           {error ? <p className="text-sm text-negative" role="alert">{error}</p> : null}
-          <Button type="submit" disabled={pending}>{pending ? "Please wait…" : mode === "signup" ? "Create account" : "Log in"}</Button>
+          <Button type="submit" disabled={pending}>{pending ? <><span className="auth-spinner" aria-hidden="true" /> Please wait…</> : mode === "signup" ? "Create account" : "Log in"}</Button>
         </form>}
         <div className="mt-3 grid gap-2">
           {GROK_PROVIDERS.map((provider) => (
@@ -168,7 +168,7 @@ export function Welcome({ initialMode = "signup" }: { initialMode?: "login" | "s
           <li><span aria-hidden="true">02</span><div><strong>Understand your month</strong><p>See the expenses you entered alongside budgets and savings goals you set.</p></div></li>
           <li><span aria-hidden="true">03</span><div><strong>Keep a copy</strong><p>Export your own ledger to Excel from Settings when you need it.</p></div></li>
         </ul>
-        <p className="mt-7 text-xs leading-5 text-hero-muted">Clearbook is a manual personal ledger. It does not read your bank messages or show a bank balance.</p>
+        <p className="mt-7 text-xs leading-5 text-hero-muted">Clearbook does not connect to your bank or show a bank balance. You can record manually or import a supported current-month PDF.</p>
       </section>
     </main>
   );

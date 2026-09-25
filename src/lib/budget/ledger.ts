@@ -20,11 +20,11 @@ import type {
   Settings,
 } from "@/lib/budget/store";
 
-const CARD_ORDER: OverviewCardId[] = ["snapshot", "stats", "rhythm", "breakdown", "goals", "notes", "recent"];
+const CARD_ORDER: OverviewCardId[] = ["snapshot", "stats", "breakdown", "recent", "rhythm", "goals", "notes"];
 
 function emptySettings(): Settings {
   return {
-    theme: "light",
+    theme: "dark",
     monthStartsOn: 1,
     cardOrder: [...CARD_ORDER],
     budgets: [],
@@ -180,12 +180,13 @@ function parseSettings(value: unknown): Settings {
   const base = emptySettings();
   const row = asRecord(value);
   if (!row) return base;
-  const theme = row.theme === "dark" ? "dark" : "light";
+  const theme = row.theme === "light" ? "light" : "dark";
   const monthStartsOn = typeof row.monthStartsOn === "number" ? Math.min(28, Math.max(1, Math.round(row.monthStartsOn))) : 1;
   const cardOrder = Array.isArray(row.cardOrder)
     ? (row.cardOrder.filter((id) => CARD_ORDER.includes(id as OverviewCardId)) as OverviewCardId[])
     : [];
   const order = [...cardOrder, ...CARD_ORDER.filter((id) => !cardOrder.includes(id))];
+  if (order.join(",") === "snapshot,stats,rhythm,breakdown,goals,notes,recent") order.splice(0, order.length, ...CARD_ORDER);
   const budgets = Array.isArray(row.budgets)
     ? row.budgets.flatMap((item) => {
         const budget = asRecord(item);
@@ -289,7 +290,7 @@ async function readSnapshot(userId: string): Promise<LedgerSnapshot> {
     values (
       ${userId},
       'INR',
-      'light',
+      'dark',
       1,
       ${JSON.stringify(defaults.cardOrder)},
       '[]',
