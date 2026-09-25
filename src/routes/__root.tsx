@@ -2,6 +2,7 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-r
 import { NotFoundPage } from "@/components/budget/not-found-page";
 import { Frame } from "@/components/budget/frame";
 import { AuthProvider } from "@/lib/auth/provider";
+import { PwaRegistration } from "@/components/pwa-registration";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
@@ -41,6 +42,7 @@ export const Route = createRootRoute({
       </head>
       <body className="antialiased">
         <PreviewHostBridge />
+        <PwaRegistration />
         <AuthProvider>
           <Frame>
             <Outlet />
