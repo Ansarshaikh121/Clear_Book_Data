@@ -54,6 +54,8 @@ export function SpendChart({ slices, total, currency, onSelect }: SpendChartProp
             paddingAngle={slices.length > 1 ? 2 : 0}
             stroke="none"
             isAnimationActive={!reduceMotion}
+            animationDuration={600}
+            animationEasing="ease-out"
             onClick={(slice) => {
               const id = (slice as { categoryId?: string }).categoryId;
               if (id && id !== "other") onSelect?.(id);
@@ -112,6 +114,8 @@ export function DailySpendChart({ points, currency, onSelect }: DailyProps) {
               radius={[3, 3, 0, 0]}
               maxBarSize={16}
               isAnimationActive={!reduceMotion}
+              animationDuration={600}
+              animationEasing="ease-out"
               onMouseEnter={(bar) => {
                 const point = bar?.payload as DaySpend | undefined;
                 if (point) setPicked(point);
