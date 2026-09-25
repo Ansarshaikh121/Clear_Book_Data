@@ -4,25 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { categoryById, currentMonthKey, formatDay, formatMoney, monthLabel, shiftMonth, type CurrencyCode, type Transaction } from "@/lib/budget/model";
 import { loadLedger, resetLedgerData } from "@/lib/budget/ledger";
+import { calendarDays } from "@/lib/budget/calendar-data";
 import { ledgerRequestSignal, useBudget } from "@/lib/budget/store";
-
-type Day = { date: string; number: number; count: number; level: number };
-
-export function calendarDays(month: string, transactions: Transaction[]): (Day | null)[] {
-  const [year, monthNumber] = month.split("-").map(Number);
-  const daysInMonth = new Date(year, monthNumber, 0).getDate();
-  const padding = new Date(year, monthNumber - 1, 1).getDay();
-  const counts = new Map<string, number>();
-  for (const tx of transactions) if (tx.date.startsWith(month + "-")) counts.set(tx.date, (counts.get(tx.date) ?? 0) + 1);
-  const max = Math.max(0, ...counts.values());
-  const cells: (Day | null)[] = Array.from({ length: padding }, () => null);
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = `${month}-${String(day).padStart(2, "0")}`;
-    const count = counts.get(date) ?? 0;
-    cells.push({ date, number: day, count, level: count ? Math.max(1, Math.ceil(count / max * 4)) : 0 });
-  }
-  return cells;
-}
 
 export function TransactionCalendar({ transactions, currency, viewMonth }: {
   transactions: Transaction[]; currency: CurrencyCode; viewMonth: string;
