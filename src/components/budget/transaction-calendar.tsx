@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { categoryById, currentMonthKey, formatDay, formatMoney, monthLabel, shiftMonth, type CurrencyCode, type Transaction } from "@/lib/budget/model";
-import { resetLedgerData } from "@/lib/budget/ledger";
+import { loadLedger, resetLedgerData } from "@/lib/budget/ledger";
 import { ledgerRequestSignal, useBudget } from "@/lib/budget/store";
 
 type Day = { date: string; number: number; count: number; level: number };
@@ -60,12 +60,23 @@ export function TransactionCalendar({ transactions, currency, viewMonth }: {
       const snapshot = await resetLedgerData({ data: { confirm: "RESET" }, signal });
       if (signal.aborted || useBudget.getState().ownerId !== ownerId) return;
       useBudget.getState().applyRemote(epoch, snapshot);
+      useBudget.setState({ notice: null });
       setMonth(currentMonthKey());
       setSelected(null);
       setConfirmReset(false);
       setResetText("");
     } catch {
-      if (!signal.aborted) setError("Could not reset your data. Please try again.");
+      if (!signal.aborted) {
+        // A lost response can follow a successful reset; reconcile before retry.
+        try {
+          const snapshot = await loadLedger({ signal });
+          if (!signal.aborted && useBudget.getState().ownerId === ownerId) {
+            useBudget.getState().applyRemote(epoch, snapshot);
+            useBudget.setState({ notice: null });
+          }
+        } catch { /* The existing ledger stays visible until the connection returns. */ }
+        setError("Connection interrupted. Check your ledger before trying again.");
+      }
     } finally {
       setResetPending(false);
     }
