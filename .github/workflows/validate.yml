@@ -16,5 +16,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      - run: node --experimental-strip-types --test src/lib/auth/sign-in-gate.test.ts src/lib/budget/worksheet.test.ts src/lib/budget/regression.test.ts
+      - run: node --experimental-strip-types --test src/lib/auth/sign-in-gate.test.ts src/lib/budget/worksheet.test.ts src/lib/budget/regression.test.ts src/lib/budget/calendar-data.test.ts
       - run: npm run build:dev
