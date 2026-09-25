@@ -8,9 +8,10 @@ type ModalProps = {
   onClose: () => void;
   children: ReactNode;
   placement?: "center" | "sheet";
+  className?: string;
 };
 
-export function Modal({ title, description, onClose, children, placement = "center" }: ModalProps) {
+export function Modal({ title, description, onClose, children, placement = "center", className = "" }: ModalProps) {
   const position =
     placement === "sheet"
       ? "dialog-panel-card panel pb-safe fixed inset-0 z-50 overflow-y-auto rounded-none p-4 focus:outline-none sm:inset-y-0 sm:left-auto sm:right-0 sm:w-[28rem] sm:max-w-none sm:rounded-none"
@@ -24,7 +25,7 @@ export function Modal({ title, description, onClose, children, placement = "cent
     >
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40" />
-        <Dialog.Content className={position}>
+        <Dialog.Content className={`${position} ${className}`}>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <Dialog.Title className="font-display text-2xl font-medium leading-tight text-foreground">
